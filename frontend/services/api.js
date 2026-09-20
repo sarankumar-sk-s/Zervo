@@ -3,7 +3,9 @@
  * Connects frontend pages to the FastAPI + Supabase PostgreSQL Backend
  */
 
-const API_BASE = window.API_BASE_URL || 'http://localhost:8000/api/v1';
+const API_BASE = window.API_BASE_URL || 
+  (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_API_BASE_URL) || 
+  'https://zervo-1.onrender.com/api/v1';
 
 // Helper to handle Auth Token
 function getAuthHeaders() {
@@ -143,7 +145,7 @@ export async function apiExtractFoodDetails(description) {
     });
   } catch (err) {
     // Also try alternate top-level /api/ai/extract-food path if needed
-    const altUrl = 'http://localhost:8000/api/ai/extract-food';
+    const altUrl = `${API_BASE.replace('/api/v1', '')}/api/ai/extract-food`;
     const res = await fetch(altUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
