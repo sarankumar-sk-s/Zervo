@@ -1,0 +1,1002 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>ZERVO - Serve Food</title>
+<script>
+  // Suppress Tailwind Play CDN warning in developer console
+  (function() {
+    const _warn = console.warn;
+    console.warn = function(...args) {
+      if (args[0] && typeof args[0] === 'string' && args[0].includes('cdn.tailwindcss.com')) return;
+      _warn.apply(console, args);
+    };
+  })();
+</script>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+
+<!-- Leaflet CSS & JS for Interactive Map -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+<!-- React 18 & Babel Standalone for Component Rendering -->
+<script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+<style>
+  .material-symbols-outlined {
+    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+  }
+  /* Ensure Leaflet container stays within form bounds */
+  .leaflet-container {
+    font-family: inherit;
+    border-radius: 1rem;
+    z-index: 10;
+  }
+</style>
+<script>
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        colors: {
+          "primary": "#0d631b", "primary-container": "#2e7d32",
+          "primary-fixed": "#a3f69c", "primary-fixed-dim": "#88d982",
+          "on-primary": "#ffffff", "on-primary-container": "#cbffc2",
+          "secondary": "#964900", "secondary-container": "#fc820c",
+          "secondary-fixed": "#ffdcc6", "secondary-fixed-dim": "#ffb786",
+          "on-secondary": "#ffffff", "on-secondary-container": "#5e2c00",
+          "on-secondary-fixed": "#311300", "on-secondary-fixed-variant": "#723600",
+          "tertiary": "#386000", "tertiary-container": "#4a7b00",
+          "tertiary-fixed": "#b9f474", "tertiary-fixed-dim": "#9ed75b",
+          "on-tertiary": "#ffffff", "on-tertiary-container": "#d6ffa5",
+          "on-tertiary-fixed": "#0f2000", "on-tertiary-fixed-variant": "#2e4f00",
+          "surface": "#f5fced", "surface-dim": "#d5dcce",
+          "surface-variant": "#dee5d6", "surface-container": "#e9f0e1",
+          "surface-container-low": "#eff6e7", "surface-container-lowest": "#ffffff",
+          "surface-container-high": "#e3ebdc", "surface-container-highest": "#dee5d6",
+          "on-surface": "#171d14", "on-surface-variant": "#40493d",
+          "inverse-surface": "#2c3228", "inverse-on-surface": "#ecf3e4",
+          "inverse-primary": "#88d982", "background": "#f5fced",
+          "on-background": "#171d14", "outline": "#707a6c",
+          "outline-variant": "#bfcaba", "error": "#ba1a1a",
+          "error-container": "#ffdad6", "on-error": "#ffffff",
+        },
+        fontFamily: {
+          "headline": ["Plus Jakarta Sans", "sans-serif"],
+          "body": ["Manrope", "sans-serif"],
+          "label": ["Manrope", "sans-serif"],
+        },
+        borderRadius: {
+          "DEFAULT": "1rem", "lg": "2rem", "xl": "3rem", "full": "9999px"
+        },
+      },
+    },
+  }
+</script>
+</head>
+<body class="bg-surface text-on-surface font-body selection:bg-primary-fixed selection:text-on-primary-fixed">
+<!-- TopNavBar -->
+<header class="bg-emerald-50/80 dark:bg-emerald-950/80 backdrop-blur-xl docked full-width top-0 sticky z-50 no-line tonal-shift-surface-container-low">
+<nav class="flex justify-between items-center w-full px-6 py-4 max-w-screen-2xl mx-auto relative">
+<a href="index.html" class="text-2xl font-black tracking-tighter text-emerald-900 dark:text-emerald-50 plusJakartaSans hover:opacity-80">
+                ZERVO
+            </a>
+<div class="flex items-center space-x-4">
+<!-- Notifications -->
+<!-- Notifications -->
+<div class="relative zervo-notifications" id="notif-wrapper">
+    <button class="zervo-notifications-btn p-2 rounded-full hover:bg-emerald-100/50 transition-colors active:scale-95 duration-200 relative flex items-center justify-center">
+        <span class="material-symbols-outlined pointer-events-none">notifications</span>
+        <span class="zervo-notifications-badge hidden absolute top-0.5 right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-error text-[10px] font-bold text-white shadow-sm pointer-events-none"></span>
+    </button>
+    <!-- Dropdown Panel -->
+    <div class="zervo-notifications-dropdown hidden absolute right-0 mt-2 sm:w-[360px] w-screen max-w-[calc(100vw-2rem)] bg-surface dark:bg-zinc-900 rounded-2xl shadow-xl border border-outline-variant/20 overflow-hidden z-50 transform origin-top transition-all duration-200 opacity-0 scale-95 pointer-events-none flex flex-col">
+        <div class="p-4 border-b border-outline-variant/10 flex justify-between items-center w-full bg-surface-container-lowest/50 backdrop-blur-sm">
+            <h3 class="font-headline font-bold text-on-surface">Notifications</h3>
+            <button class="zervo-notifications-mark-all text-xs font-bold text-primary hover:text-green-800 transition-colors cursor-pointer">Mark as read</button>
+        </div>
+        <div class="zervo-notifications-list w-full max-h-[60vh] overflow-y-auto"></div>
+        <div class="zervo-notifications-empty hidden py-12 px-6 flex flex-col items-center justify-center text-center gap-3 w-full border-t border-outline-variant/5">
+            <div class="w-16 h-16 rounded-full bg-surface-variant/20 flex items-center justify-center text-primary">
+                <span class="material-symbols-outlined text-3xl">notifications_off</span>
+            </div>
+            <p class="text-on-surface-variant font-medium text-sm">No notifications yet</p>
+        </div>
+    </div>
+</div>
+<!-- Profile Dropdown -->
+<div class="relative zervo-profile-wrapper">
+    <button class="zervo-profile-rtrig flex items-center justify-center rounded-full ring-2 ring-transparent hover:ring-primary/20 focus:ring-primary/40 focus:outline-none transition-all duration-200 active:scale-95 overflow-hidden" aria-haspopup="true" aria-expanded="false">
+        <div class="w-10 h-10 bg-primary-container rounded-full flex items-center justify-center text-primary font-bold text-sm font-headline">
+            GE
+        </div>
+    </button>
+    <!-- Dropdown Panel -->
+    <div class="zervo-profile-rdown absolute right-0 mt-3 w-64 bg-surface-container-lowest rounded-2xl shadow-xl border border-outline-variant/20 z-50 overflow-hidden transform origin-top-right transition-all duration-200 ease-out flex flex-col opacity-0 scale-95 -translate-y-2 invisible pointer-events-none">
+        <div class="p-4 border-b border-outline-variant/10 bg-surface-container-low/50">
+            <p class="font-headline font-bold text-on-surface text-sm truncate">Green Earth Bakery</p>
+            <p class="text-on-surface-variant font-medium text-xs mt-0.5 truncate">greenearth@bakery.org</p>
+        </div>
+        <div class="py-2">
+            <a href="editprofile.html" class="flex items-center w-full px-4 py-2.5 text-sm font-medium text-on-surface hover:bg-surface-variant/40 hover:text-primary transition-colors focus:outline-none" role="menuitem">
+                <span class="material-symbols-outlined mr-3 text-[20px]">person</span> View Profile
+            </a>
+
+        </div>
+        <div class="py-2 border-t border-outline-variant/10">
+            <a href="login.html" class="flex items-center w-full px-4 py-2.5 text-sm font-bold text-error hover:bg-error/10 transition-colors focus:outline-none" role="menuitem">
+                <span class="material-symbols-outlined mr-3 text-[20px]">logout</span> Logout
+            </a>
+        </div>
+    </div>
+</div>
+</div>
+</nav>
+</header>
+<main class="min-h-screen pb-32">
+<!-- Hero Section -->
+<section class="max-w-4xl mx-auto px-6 pt-12 pb-8">
+<div class="flex flex-col md:flex-row gap-8 items-center">
+<div class="flex-1 space-y-4">
+<h1 class="text-5xl md:text-6xl font-extrabold tracking-tight plusJakartaSans text-on-surface leading-[1.1]">
+                        Serve your <br/><span class="text-primary italic">Community.</span>
+</h1>
+<p class="text-on-surface-variant text-lg manrope max-w-md leading-relaxed">
+                        Every meal shared is a step toward zero waste. List your surplus food and nourish your neighbors today.
+                    </p>
+</div>
+<div class="w-full md:w-1/3 aspect-square rounded-lg bg-primary-container/10 overflow-hidden relative group">
+<img class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" data-alt="Close up of fresh healthy vegetables and artisanal bread in a rustic basket, soft natural lighting on wooden table" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB3g0gupTkg_3mSZP1-lhWTI-4wLE_WLFi1pTRsFrrE_93M3g4zXKMe-wUKP3wAUf7bEJEU97qlrAiFjNW8MIahpNLPQmBVsCT1JGy2AJ_u2Pxo6QkHbNYSJoHJVqHC-bqRMq_u2WA20ajiabiz-nnvpccLoX1oHI8hQJNiowg37yfspj_E6XJh9AU1acKQafvEy4egy5A2-bJYj6tokpwK8kZMVbjX-27FxGGzFvC1OKqPIw5A0O40KI7p8TEJ49QDprzA9qy0tHs"/>
+<div class="absolute inset-0 bg-gradient-to-t from-primary/40 to-transparent"></div>
+</div>
+</div>
+</section>
+<!-- Form Section -->
+<section class="max-w-4xl mx-auto px-6">
+<div class="bg-surface-container-low rounded-xl p-8 md:p-12 shadow-[0px_20px_40px_rgba(23,29,20,0.06)] border border-outline-variant/10">
+<form class="space-y-12">
+<!-- Photo Upload -->
+<div class="space-y-4">
+<label class="block text-xl font-bold plusJakartaSans text-on-surface">1. Food Appearance</label>
+<!-- Hidden inputs -->
+<input id="food-photo-upload" type="file" accept="image/*" style="display:none;" onchange="handleFoodPhoto(this)"/>
+<input id="food-photo-camera" type="file" accept="image/*" capture="environment" style="display:none;" onchange="handleFoodPhoto(this)"/>
+
+<!-- Upload area / Preview -->
+<div id="food-photo-area" onclick="document.getElementById('food-photo-upload').click()" class="w-full h-64 rounded-lg bg-surface-container-highest border-2 border-dashed border-outline-variant/40 flex flex-col items-center justify-center space-y-3 transition-all hover:bg-surface-container-lowest hover:border-primary/40 cursor-pointer relative overflow-hidden">
+  <img id="food-photo-preview" src="" alt="Preview" style="display:none;width:100%;height:100%;object-fit:cover;position:absolute;inset:0;"/>
+  <div id="food-photo-placeholder" style="display:flex;flex-direction:column;align-items:center;gap:0.5rem;">
+    <span class="material-symbols-outlined text-5xl text-primary/60">add_a_photo</span>
+    <p class="manrope font-medium text-on-surface-variant">Tap to upload food photo</p>
+    <p class="manrope text-sm text-outline">JPEG or PNG, up to 10MB</p>
+  </div>
+</div>
+
+<!-- Camera + Upload buttons -->
+<div style="display:flex;gap:0.75rem;margin-top:0.75rem;">
+  <button type="button" onclick="document.getElementById('food-photo-camera').click()" style="flex:1;padding:0.75rem;border-radius:9999px;border:2px solid #0d631b;background:transparent;color:#0d631b;font-weight:700;font-family:Manrope,sans-serif;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:0.5rem;">
+    <span class="material-symbols-outlined" style="font-size:1.25rem;">photo_camera</span> Take Photo
+  </button>
+  <button type="button" onclick="document.getElementById('food-photo-upload').click()" style="flex:1;padding:0.75rem;border-radius:9999px;border:2px solid #bfcaba;background:transparent;color:#40493d;font-weight:700;font-family:Manrope,sans-serif;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:0.5rem;">
+    <span class="material-symbols-outlined" style="font-size:1.25rem;">upload</span> Upload Photo
+  </button>
+</div>
+</div>
+<!-- AI Natural Language Input Card -->
+<div class="rounded-2xl p-6 md:p-8 bg-gradient-to-br from-emerald-500/10 via-primary-container/5 to-surface-container border border-primary/20 shadow-sm relative overflow-hidden transition-all duration-300">
+  <div class="flex items-center justify-between gap-3 mb-3">
+    <div class="flex items-center gap-2">
+      <span class="material-symbols-outlined text-primary text-2xl animate-pulse">auto_awesome</span>
+      <h2 class="text-xl font-bold plusJakartaSans text-on-surface">✨ Smart AI Donation Assistant</h2>
+    </div>
+    <span class="text-xs font-semibold px-3 py-1 rounded-full bg-primary/10 text-primary uppercase tracking-wider">Gemini 2.5 Flash</span>
+  </div>
+  <p class="text-sm manrope text-on-surface-variant mb-4 leading-relaxed">
+    Describe what you are donating in everyday words. Our AI automatically extracts and fills in the donation details below for your verification.
+  </p>
+  
+  <div class="space-y-3">
+    <label for="ai-food-description" class="block text-sm font-bold plusJakartaSans text-on-surface">
+      Describe your food in your own words
+    </label>
+    <div class="relative">
+      <textarea
+        id="ai-food-description"
+        rows="3"
+        class="w-full px-5 py-3.5 rounded-xl bg-surface-container-highest border border-outline-variant/30 focus:ring-2 focus:ring-primary focus:bg-surface-container-lowest manrope text-on-surface transition-all resize-none placeholder:text-on-surface-variant/50"
+        placeholder="Example: I have 30 packets of veg biryani made at 7 PM..."></textarea>
+    </div>
+    
+    <div class="flex flex-wrap items-center justify-between gap-4 pt-1">
+      <button
+        id="ai-extract-btn"
+        type="button"
+        class="px-6 py-3 rounded-full bg-primary text-on-primary font-bold text-sm plusJakartaSans flex items-center gap-2 shadow-md hover:bg-emerald-800 hover:shadow-lg active:scale-95 transition-all duration-200 cursor-pointer disabled:opacity-50 disabled:pointer-events-none">
+        <span class="material-symbols-outlined text-lg">auto_awesome</span>
+        <span id="ai-btn-text">✨ Extract Food Details</span>
+      </button>
+      
+      <!-- Quick sample prompts -->
+      <div class="flex flex-wrap gap-2 text-xs text-on-surface-variant items-center">
+        <span class="font-medium text-[11px] text-outline">Try:</span>
+        <button type="button" class="ai-quick-sample px-2.5 py-1 rounded-md bg-surface-variant/40 hover:bg-surface-variant/80 transition-colors cursor-pointer" data-sample="I have 30 packets of veg biryani made at 7 PM.">
+          30 packets veg biryani
+        </button>
+        <button type="button" class="ai-quick-sample px-2.5 py-1 rounded-md bg-surface-variant/40 hover:bg-surface-variant/80 transition-colors cursor-pointer" data-sample="50 meals of chicken biryani prepared at 6 PM.">
+          50 meals chicken biryani
+        </button>
+        <button type="button" class="ai-quick-sample px-2.5 py-1 rounded-md bg-surface-variant/40 hover:bg-surface-variant/80 transition-colors cursor-pointer" data-sample="We have 10 kg cooked rice.">
+          10 kg cooked rice
+        </button>
+      </div>
+    </div>
+    
+    <!-- Loading State -->
+    <div id="ai-loading-state" class="hidden mt-3 p-3.5 rounded-xl bg-primary/10 border border-primary/20 text-primary flex items-center gap-3">
+      <span class="material-symbols-outlined text-xl animate-spin">progress_activity</span>
+      <span class="text-sm font-semibold manrope">✨ Understanding your food description...</span>
+    </div>
+    
+    <!-- Verification Banner -->
+    <div id="ai-success-banner" class="hidden mt-3 p-3.5 rounded-xl bg-emerald-500/15 border border-primary/30 text-emerald-900 dark:text-emerald-100 flex items-center justify-between gap-3">
+      <div class="flex items-center gap-2.5">
+        <span class="material-symbols-outlined text-primary text-xl">check_circle</span>
+        <span class="text-sm font-bold manrope">✨ AI extracted — please verify before submitting</span>
+      </div>
+      <button type="button" id="dismiss-ai-banner" class="text-on-surface-variant hover:text-on-surface text-xs font-bold underline cursor-pointer">
+        Dismiss
+      </button>
+    </div>
+    
+    <!-- Error Banner -->
+    <div id="ai-error-banner" class="hidden mt-3 p-3.5 rounded-xl bg-error/10 border border-error/20 text-error flex items-center gap-2.5">
+      <span class="material-symbols-outlined text-xl">error</span>
+      <span class="text-sm font-semibold manrope">Unable to extract details. Please enter the information manually.</span>
+    </div>
+  </div>
+</div>
+
+<div class="grid grid-cols-1 md:grid-cols-2 gap-10">
+<!-- Food Item Name -->
+<div class="space-y-4">
+<label class="block text-xl font-bold plusJakartaSans text-on-surface">2. Food Item / Title</label>
+<div class="relative">
+<input class="w-full px-6 py-4 rounded-lg bg-surface-container-highest border-none focus:ring-2 focus:ring-primary/20 focus:bg-surface-container-lowest manrope text-on-surface transition-all" id="food-name" placeholder="e.g. Veg Biryani, Rice, Meals" type="text"/>
+<span class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-primary/60">restaurant</span>
+</div>
+</div>
+<!-- Food Quantity -->
+<div class="space-y-4">
+<label class="block text-xl font-bold plusJakartaSans text-on-surface">3. Food Quantity</label>
+<div class="relative">
+<input class="w-full px-6 py-4 rounded-lg bg-surface-container-highest border-none focus:ring-2 focus:ring-primary/20 focus:bg-surface-container-lowest manrope text-on-surface transition-all" id="food-quantity" placeholder="e.g. 5 meals or 2kg" type="text"/>
+<span class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-primary/60">scale</span>
+</div>
+</div>
+<!-- Food Type -->
+<div class="space-y-4">
+<label class="block text-xl font-bold plusJakartaSans text-on-surface">3. Food Type</label>
+<div class="flex flex-wrap gap-3 flex-col">
+<div class="flex flex-wrap gap-4 flex-col">
+<label class="relative cursor-pointer group">
+<input class="peer sr-only" name="food_type" required="" type="radio" value="veg"/>
+<div class="px-8 py-2.5 rounded-full border-2 border-outline-variant/30 bg-surface-container-high text-on-surface-variant font-semibold manrope transition-all peer-checked:bg-[#2E7D32] peer-checked:text-white peer-checked:border-[#2E7D32] hover:border-[#2E7D32]/50">Veg</div>
+</label>
+<label class="relative cursor-pointer group">
+<input class="peer sr-only" name="food_type" type="radio" value="non-veg"/>
+<div class="px-8 py-2.5 rounded-full border-2 border-outline-variant/30 bg-surface-container-high text-on-surface-variant font-semibold manrope transition-all peer-checked:bg-[#2E7D32] peer-checked:text-white peer-checked:border-[#2E7D32] hover:border-[#2E7D32]/50">Non-Veg</div>
+</label>
+<label class="relative cursor-pointer group">
+<input class="peer sr-only" name="food_type" type="radio" value="both"/>
+<div class="px-8 py-2.5 rounded-full border-2 border-outline-variant/30 bg-surface-container-high text-on-surface-variant font-semibold manrope transition-all peer-checked:bg-[#2E7D32] peer-checked:text-white peer-checked:border-[#2E7D32] hover:border-[#2E7D32]/50">Both</div>
+</label>
+</div>
+<p class="text-[10px] text-on-surface-variant/60 manrope mt-2 italic select-none">Please select one option to proceed with listing.</p></div>
+</div>
+</div>
+<!-- Pickup Location -->
+<!-- Organization Name -->
+<div class="space-y-4">
+<label class="block text-xl font-bold plusJakartaSans text-on-surface">4. Organization Name</label>
+<div class="relative group">
+<input class="w-full px-6 py-4 rounded-lg bg-surface-container-highest border-none focus:ring-2 focus:ring-primary/20 focus:bg-surface-container-lowest manrope text-on-surface transition-all" id="org-name" placeholder="Enter organization name" type="text"/>
+<span class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-primary/60">business</span>
+</div>
+</div><!-- 5. Interactive Map & Pickup Location -->
+<div class="space-y-4 col-span-1 md:col-span-2">
+<div class="flex items-center justify-between">
+  <label class="block text-xl font-bold plusJakartaSans text-on-surface flex items-center gap-2">
+    <span>📍</span> 5. Pickup Location
+  </label>
+  <span class="text-xs font-semibold px-2.5 py-1 rounded-full bg-primary/10 text-primary uppercase tracking-wider">
+    Leaflet + MapTiler
+  </span>
+</div>
+
+<!-- React Map Container Mount Point -->
+<div id="react-location-picker-mount" class="w-full"></div>
+
+<!-- Hidden inputs for seamless form submission -->
+<input type="hidden" id="pickup-location" name="pickup_location" />
+<input type="hidden" id="pickup-latitude" name="pickup_latitude" />
+<input type="hidden" id="pickup-longitude" name="pickup_longitude" />
+<input type="hidden" id="location-confirmed" value="false" />
+</div>
+<!-- Cooked Time -->
+<div class="space-y-4">
+<label class="block text-xl font-bold plusJakartaSans text-on-surface">6. Food Cooked Time</label>
+<div class="relative">
+<input class="w-full px-6 py-4 rounded-lg bg-surface-container-highest border-none focus:ring-2 focus:ring-primary/20 focus:bg-surface-container-lowest manrope text-on-surface transition-all" id="cooked-time" type="datetime-local"/>
+</div>
+<p class="text-sm manrope text-on-surface-variant italic">Freshness transparency helps speed up redistribution.</p>
+</div>
+<!-- Preferred Pickup Time -->
+<div class="space-y-4">
+<label class="block text-xl font-bold plusJakartaSans text-on-surface">7. Preferred Pickup Time</label>
+<div class="relative">
+<select id="pickup-time" class="w-full px-6 py-4 rounded-lg bg-surface-container-highest border-none focus:ring-2 focus:ring-primary/20 focus:bg-surface-container-lowest manrope text-on-surface transition-all appearance-none">
+<option value="morning">Morning (8:00 AM - 12:00 PM)</option>
+<option selected="" value="afternoon">Afternoon (12:00 PM - 4:00 PM)</option>
+<option value="evening">Evening (4:00 PM - 8:00 PM)</option>
+</select>
+</div>
+</div>
+<!-- Submit Button -->
+<!-- Contact Number -->
+<div class="space-y-4">
+<label class="block text-xl font-bold plusJakartaSans text-on-surface">8. User Name</label>
+<div class="relative">
+<input class="w-full px-6 py-4 rounded-lg bg-surface-container-highest border-none focus:ring-2 focus:ring-primary/20 focus:bg-surface-container-lowest manrope text-on-surface transition-all" id="user-name" placeholder="e.g. John Doe" type="text"/>
+<span class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-primary/60">person</span>
+</div>
+</div><div class="space-y-4 mb-8">
+<label class="block text-xl font-bold plusJakartaSans text-on-surface">9. Contact Number</label>
+<div class="relative">
+<input class="w-full px-6 py-4 rounded-lg bg-surface-container-highest border-none focus:ring-2 focus:ring-primary/20 focus:bg-surface-container-lowest manrope text-on-surface transition-all" id="contact-number" placeholder="e.g. +1 234 567 8900" type="tel"/>
+<span class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-primary/60">call</span>
+</div>
+</div><div class="pt-8">
+<div class="flex flex-col items-center md:items-start gap-6">
+<button id="submit-btn" class="w-full md:w-auto px-12 py-5 rounded-xl bg-secondary-container text-on-secondary-container plusJakartaSans font-extrabold text-xl shadow-[0px_10px_20px_rgba(252,130,12,0.2)] hover:scale-105 active:scale-95 transition-all duration-300" type="button">Submit</button>
+</div>
+</div>
+</form>
+</div>
+</section>
+</main>
+<script type="module" src="assets/js/profile.js"></script>
+
+<script type="module" src="services/api.js"></script>
+
+<script type="module">
+  import { apiCreateFoodListing, apiExtractFoodDetails } from "./services/api.js";
+
+  // ── Food Submission Form & AI Assistant (FastAPI + Gemini Connected) ──────
+
+  let currentUser = null;
+
+  // ── Show toast ────────────────────────────────────────────────────────
+  function showToast(msg, isError = false) {
+    let toast = document.getElementById('sub-toast');
+    if (!toast) {
+      toast = document.createElement('div');
+      toast.id = 'sub-toast';
+      toast.style.cssText = 'position:fixed;top:80px;left:50%;transform:translateX(-50%);z-index:9999;padding:14px 28px;border-radius:999px;font-weight:700;font-size:15px;box-shadow:0 4px 20px rgba(0,0,0,0.15);';
+      document.body.appendChild(toast);
+    }
+    toast.textContent = msg;
+    toast.style.background = isError ? '#ba1a1a' : '#0d631b';
+    toast.style.color = '#fff';
+    toast.style.display = 'block';
+    setTimeout(() => toast.style.display = 'none', 4000);
+  }
+
+  // ── Food photo (window scope so HTML onchange can access) ──────────────
+  window.foodPhotoBase64 = null;
+  window.handleFoodPhoto = function(input) {
+    const file = input.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      window.foodPhotoBase64 = e.target.result;
+      const preview     = document.getElementById('food-photo-preview');
+      const placeholder = document.getElementById('food-photo-placeholder');
+      if (preview)     { preview.src = window.foodPhotoBase64; preview.style.display = 'block'; }
+      if (placeholder) { placeholder.style.display = 'none'; }
+    };
+    reader.readAsDataURL(file);
+  };
+
+  // ── Helper: Convert Natural Time (e.g. '7 PM') to datetime-local String ─
+  function parseTimeToDateTimeLocal(timeStr) {
+    if (!timeStr) return '';
+    try {
+      const now = new Date();
+      const match = timeStr.match(/(\d{1,2})(?::(\d{2}))?\s*(am|pm)?/i);
+      if (match) {
+        let hours = parseInt(match[1], 10);
+        const minutes = match[2] ? parseInt(match[2], 10) : 0;
+        const meridian = match[3] ? match[3].toLowerCase() : null;
+        if (meridian === 'pm' && hours < 12) hours += 12;
+        if (meridian === 'am' && hours === 12) hours = 0;
+        now.setHours(hours, minutes, 0, 0);
+        const pad = (n) => String(n).padStart(2, '0');
+        return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}T${pad(hours)}:${pad(minutes)}`;
+      }
+    } catch (e) {
+      console.warn("Could not parse time string into datetime-local:", e);
+    }
+    return '';
+  }
+
+  // ── Load user data on page load ────────────────────────────────────────
+  function initializeSubmission() {
+    const user = JSON.parse(localStorage.getItem('zervo_current_user') || 'null');
+    if (!user) { 
+      window.location.href = 'login.html'; 
+      return; 
+    }
+    currentUser = user;
+
+    const nameEl = document.getElementById('user-name');
+    const contactEl = document.getElementById('contact-number');
+    if (nameEl && user.name) nameEl.value = user.name;
+    if (contactEl && user.phone) contactEl.value = user.phone;
+  }
+
+  // ── AI Extraction Feature Setup ─────────────────────────────────────────
+  function setupAIExtraction() {
+    const extractBtn    = document.getElementById('ai-extract-btn');
+    const btnText       = document.getElementById('ai-btn-text');
+    const descInput     = document.getElementById('ai-food-description');
+    const loadingState  = document.getElementById('ai-loading-state');
+    const successBanner = document.getElementById('ai-success-banner');
+    const errorBanner   = document.getElementById('ai-error-banner');
+    const dismissBanner = document.getElementById('dismiss-ai-banner');
+
+    if (dismissBanner && successBanner) {
+      dismissBanner.addEventListener('click', () => {
+        successBanner.classList.add('hidden');
+      });
+    }
+
+    // Quick prompt sample chips
+    document.querySelectorAll('.ai-quick-sample').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const sample = btn.getAttribute('data-sample');
+        if (descInput && sample) {
+          descInput.value = sample;
+          descInput.focus();
+        }
+      });
+    });
+
+    if (!extractBtn || !descInput) return;
+
+    extractBtn.addEventListener('click', async () => {
+      const description = descInput.value.trim();
+      if (!description) {
+        showToast('Please describe your food in the input box first', true);
+        descInput.focus();
+        return;
+      }
+
+      // 1. Loading State
+      extractBtn.disabled = true;
+      if (btnText) btnText.textContent = '✨ Understanding your food description...';
+      if (loadingState) loadingState.classList.remove('hidden');
+      if (successBanner) successBanner.classList.add('hidden');
+      if (errorBanner) errorBanner.classList.add('hidden');
+
+      try {
+        // 2. Call FastAPI backend (which invokes Gemini 2.5 Flash with structured JSON schema)
+        const data = await apiExtractFoodDetails(description);
+
+        // 3. Auto-populate Form Fields
+        // Food Name
+        const nameInput = document.getElementById('food-name');
+        if (nameInput && data.food_name) {
+          nameInput.value = data.food_name;
+        }
+
+        // Food Quantity
+        const qtyInput = document.getElementById('food-quantity');
+        if (qtyInput) {
+          if (data.quantity !== null && data.quantity !== undefined) {
+            qtyInput.value = data.unit ? `${data.quantity} ${data.unit}` : `${data.quantity}`;
+          } else if (data.unit) {
+            qtyInput.value = data.unit;
+          }
+        }
+
+        // Food Type
+        if (data.food_type === 'vegetarian' || data.food_type === 'vegan') {
+          const vegRadio = document.querySelector('input[name="food_type"][value="veg"]');
+          if (vegRadio) vegRadio.checked = true;
+        } else if (data.food_type === 'non_vegetarian') {
+          const nonVegRadio = document.querySelector('input[name="food_type"][value="non-veg"]');
+          if (nonVegRadio) nonVegRadio.checked = true;
+        }
+
+        // Cooked Time
+        if (data.prepared_time) {
+          const timeInput = document.getElementById('cooked-time');
+          const dtLocal = parseTimeToDateTimeLocal(data.prepared_time);
+          if (timeInput && dtLocal) {
+            timeInput.value = dtLocal;
+          }
+        }
+
+        // 4. Show Verification Notice
+        if (successBanner) successBanner.classList.remove('hidden');
+        showToast('✨ Food details extracted! Please verify fields before submitting.');
+
+        // Highlight populated fields briefly
+        [nameInput, qtyInput].forEach(el => {
+          if (el && el.value) {
+            el.classList.add('ring-2', 'ring-primary/40');
+            setTimeout(() => el.classList.remove('ring-2', 'ring-primary/40'), 2500);
+          }
+        });
+
+      } catch (err) {
+        console.error("AI Extraction Error:", err);
+        if (errorBanner) errorBanner.classList.remove('hidden');
+        showToast('Unable to extract details. Please enter the information manually.', true);
+      } finally {
+        // 5. Restore Button State
+        extractBtn.disabled = false;
+        if (btnText) btnText.textContent = '✨ Extract Food Details';
+        if (loadingState) loadingState.classList.add('hidden');
+      }
+    });
+  }
+
+  // ── Submit button handler ─────────────────────────────────────────────
+  document.addEventListener('DOMContentLoaded', () => {
+    initializeSubmission();
+    setupAIExtraction();
+    
+    const submitBtn = document.getElementById('submit-btn');
+    if (!submitBtn) return;
+    let isSubmitting = false;
+
+    submitBtn.addEventListener('click', async () => {
+      if (!currentUser) { showToast('Please login first', true); return; }
+      if (isSubmitting) return;
+
+      const foodName   = document.getElementById('food-name')?.value.trim();
+      const rawQty     = document.getElementById('food-quantity')?.value.trim();
+      const foodType   = document.querySelector('input[name="food_type"]:checked')?.value;
+      const orgName    = document.getElementById('org-name')?.value.trim();
+      const locationAddr = document.getElementById('pickup-location')?.value.trim();
+      const latStr       = document.getElementById('pickup-latitude')?.value;
+      const lngStr       = document.getElementById('pickup-longitude')?.value;
+      const isConfirmed  = document.getElementById('location-confirmed')?.value === 'true';
+      const cookedTime   = document.getElementById('cooked-time')?.value;
+      const pickupTime   = document.getElementById('pickup-time')?.value;
+      const userName     = document.getElementById('user-name')?.value.trim();
+      const contact      = document.getElementById('contact-number')?.value.trim();
+
+      if (!rawQty)       { showToast('❌ Please enter food quantity', true);   return; }
+      if (!foodType)     { showToast('❌ Please select food type', true);       return; }
+      if (!locationAddr) { showToast('📍 Please select your pickup location on the map.', true);  return; }
+      if (!isConfirmed && !window.zervoSelectedLocation?.manual) {
+        showToast('📍 Please confirm your location with "[ ✓ Confirm Location ]"', true);
+        return;
+      }
+      if (!contact)      { showToast('❌ Please enter contact number', true);   return; }
+
+      // Combined quantity string keeping food title intact for downstream displays
+      const finalQuantity = foodName ? `${foodName} (${rawQty})` : rawQty;
+      const latitude = latStr ? parseFloat(latStr) : null;
+      const longitude = lngStr ? parseFloat(lngStr) : null;
+
+      isSubmitting = true;
+      submitBtn.textContent = 'Submitting…';
+      submitBtn.disabled    = true;
+
+      const listingData = {
+        organisation: orgName || '',
+        donorName: userName || currentUser.name || 'Anonymous',
+        foodType: foodType,
+        quantity: finalQuantity,
+        location: locationAddr,
+        pickup_address: locationAddr,
+        pickupAddress: locationAddr,
+        latitude: latitude,
+        longitude: longitude,
+        cookedTime: cookedTime || '',
+        pickupTime: pickupTime || '',
+        contact: contact,
+        photo: window.foodPhotoBase64 || null
+      };
+
+      try {
+        await apiCreateFoodListing(listingData);
+      } catch (err) {
+        console.warn("Backend unavailable, using local session cache:", err.message);
+      }
+
+      // Store in sessionStorage for frontend session
+      const foodId = 'food-' + Date.now();
+      let submissions = JSON.parse(sessionStorage.getItem('zervo_submissions') || '{}');
+      submissions[foodId] = { id: foodId, ...listingData, status: 'available', createdAt: Date.now() };
+      sessionStorage.setItem('zervo_submissions', JSON.stringify(submissions));
+
+      showToast('✅ Food listed successfully! Volunteers notified!');
+
+      setTimeout(() => {
+        window.location.href = 'submission.html';
+      }, 1800);
+    });
+  });
+</script>
+
+<!-- React Leaflet + MapTiler LocationPicker Component Script -->
+<script type="text/babel">
+  const { useState, useEffect, useRef } = React;
+
+  const LocationPicker = ({ onLocationChange }) => {
+    const [searchQuery, setSearchQuery] = useState('');
+    const [searchResults, setSearchResults] = useState([]);
+    const [isSearching, setIsSearching] = useState(false);
+    const [searchError, setSearchError] = useState('');
+    const [selectedLocation, setSelectedLocation] = useState({
+      address: '',
+      latitude: 11.0168,
+      longitude: 76.9558
+    });
+    const [isConfirmed, setIsConfirmed] = useState(false);
+    const [manualMode, setManualMode] = useState(false);
+
+    const mapContainerRef = useRef(null);
+    const mapInstanceRef = useRef(null);
+    const markerRef = useRef(null);
+    const searchTimeoutRef = useRef(null);
+
+    const apiKey = window.VITE_MAPTILER_API_KEY || window.MAPTILER_API_KEY || 'GubfDhTwNQN3F3uO8PUt';
+
+    useEffect(() => {
+      if (manualMode || !mapContainerRef.current) return;
+      if (typeof L === 'undefined') return;
+
+      delete L.Icon.Default.prototype._getIconUrl;
+      L.Icon.Default.mergeOptions({
+        iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
+        iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+        shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png'
+      });
+
+      const startLat = selectedLocation.latitude || 11.0168;
+      const startLng = selectedLocation.longitude || 76.9558;
+
+      if (!mapInstanceRef.current) {
+        const map = L.map(mapContainerRef.current, {
+          center: [startLat, startLng],
+          zoom: 14,
+          zoomControl: true
+        });
+
+        const tileUrl = (apiKey && apiKey !== 'YOUR_MAPTILER_API_KEY')
+          ? `https://api.maptiler.com/maps/streets-v2/{z}/{x}/{y}.png?key=${apiKey}`
+          : 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
+
+        const attribution = (apiKey && apiKey !== 'YOUR_MAPTILER_API_KEY')
+          ? '&copy; <a href="https://www.maptiler.com/">MapTiler</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+          : '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>';
+
+        L.tileLayer(tileUrl, {
+          attribution,
+          maxZoom: 19,
+          tileSize: 512,
+          zoomOffset: (apiKey && apiKey !== 'YOUR_MAPTILER_API_KEY') ? -1 : 0
+        }).addTo(map);
+
+        const marker = L.marker([startLat, startLng], {
+          draggable: true,
+          autoPan: true
+        }).addTo(map);
+
+        marker.on('dragend', () => {
+          const pos = marker.getLatLng();
+          handleCoordinatesSelected(pos.lat, pos.lng, true);
+        });
+
+        map.on('click', (e) => {
+          marker.setLatLng(e.latlng);
+          handleCoordinatesSelected(e.latlng.lat, e.latlng.lng, true);
+        });
+
+        mapInstanceRef.current = map;
+        markerRef.current = marker;
+
+        setTimeout(() => {
+          if (mapInstanceRef.current) mapInstanceRef.current.invalidateSize();
+        }, 300);
+      }
+    }, [manualMode]);
+
+    const reverseGeocode = async (lat, lng) => {
+      try {
+        if (apiKey && apiKey !== 'YOUR_MAPTILER_API_KEY') {
+          const url = `https://api.maptiler.com/geocoding/${lng},${lat}.json?key=${apiKey}`;
+          const res = await fetch(url);
+          if (res.ok) {
+            const data = await res.json();
+            if (data.features && data.features.length > 0) {
+              return data.features[0].place_name || data.features[0].text;
+            }
+          }
+        }
+        const nomUrl = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`;
+        const nomRes = await fetch(nomUrl, { headers: { 'Accept-Language': 'en' } });
+        if (nomRes.ok) {
+          const nomData = await nomRes.json();
+          return nomData.display_name;
+        }
+      } catch (err) {
+        console.warn('Reverse geocode error:', err);
+      }
+      return `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+    };
+
+    const handleCoordinatesSelected = async (lat, lng, doReverse = false, customAddress = '') => {
+      setIsConfirmed(false);
+      let addr = customAddress;
+      if (doReverse && !customAddress) {
+        addr = await reverseGeocode(lat, lng);
+      }
+
+      const updated = {
+        address: addr || selectedLocation.address || `${lat.toFixed(5)}, ${lng.toFixed(5)}`,
+        latitude: parseFloat(lat.toFixed(6)),
+        longitude: parseFloat(lng.toFixed(6))
+      };
+
+      setSelectedLocation(updated);
+      if (markerRef.current) markerRef.current.setLatLng([lat, lng]);
+      if (onLocationChange) onLocationChange({ ...updated, isConfirmed: false });
+    };
+
+    const searchLocation = async (query) => {
+      if (!query || query.trim().length < 2) {
+        setSearchResults([]);
+        setSearchError('');
+        return;
+      }
+      setIsSearching(true);
+      setSearchError('');
+
+      try {
+        let results = [];
+        if (apiKey && apiKey !== 'YOUR_MAPTILER_API_KEY') {
+          const url = `https://api.maptiler.com/geocoding/${encodeURIComponent(query)}.json?key=${apiKey}&limit=5`;
+          const res = await fetch(url);
+          if (res.ok) {
+            const data = await res.json();
+            results = (data.features || []).map(f => ({
+              name: f.text,
+              formatted: f.place_name,
+              lng: f.geometry.coordinates[0],
+              lat: f.geometry.coordinates[1]
+            }));
+          }
+        }
+        if (results.length === 0) {
+          const nomUrl = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5`;
+          const res = await fetch(nomUrl, { headers: { 'Accept-Language': 'en' } });
+          if (res.ok) {
+            const data = await res.json();
+            results = data.map(item => ({
+              name: item.name || item.display_name.split(',')[0],
+              formatted: item.display_name,
+              lat: parseFloat(item.lat),
+              lng: parseFloat(item.lon)
+            }));
+          }
+        }
+        if (results.length === 0) {
+          setSearchError('No locations found.');
+        }
+        setSearchResults(results);
+      } catch (err) {
+        setSearchError('Unable to search location. Please try again.');
+        setSearchResults([]);
+      } finally {
+        setIsSearching(false);
+      }
+    };
+
+    const handleSearchChange = (e) => {
+      const val = e.target.value;
+      setSearchQuery(val);
+      if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
+      searchTimeoutRef.current = setTimeout(() => searchLocation(val), 350);
+    };
+
+    const handleSelectResult = (item) => {
+      setSearchQuery(item.formatted);
+      setSearchResults([]);
+      setSearchError('');
+      handleCoordinatesSelected(item.lat, item.lng, false, item.formatted);
+      if (mapInstanceRef.current) {
+        mapInstanceRef.current.flyTo([item.lat, item.lng], 16, { animate: true, duration: 1.2 });
+      }
+    };
+
+    const handleConfirm = () => {
+      if (!selectedLocation.address) {
+        alert('Please select or search a location first.');
+        return;
+      }
+      setIsConfirmed(true);
+      if (onLocationChange) {
+        onLocationChange({
+          ...selectedLocation,
+          isConfirmed: true
+        });
+      }
+    };
+
+    return (
+      <div className="location-picker-card space-y-4">
+        {/* Search Box */}
+        <div className="relative">
+          <div className="relative flex items-center">
+            <input
+              type="text"
+              id="maptiler-search-input"
+              value={searchQuery}
+              onChange={handleSearchChange}
+              placeholder="🔍 Search location, college, restaurant, street, landmark..."
+              className="w-full px-5 py-3.5 pr-10 rounded-xl bg-surface-container-highest border border-outline-variant/30 focus:ring-2 focus:ring-primary focus:bg-surface-container-lowest manrope text-on-surface text-sm transition-all"
+            />
+            {isSearching && (
+              <span className="material-symbols-outlined absolute right-3 animate-spin text-primary text-xl pointer-events-none">
+                progress_activity
+              </span>
+            )}
+          </div>
+
+          {/* Autocomplete Suggestions Dropdown */}
+          {searchResults.length > 0 && (
+            <div id="maptiler-search-results" className="absolute top-full left-0 right-0 mt-1.5 bg-surface-container-lowest rounded-xl shadow-2xl border border-outline-variant/20 z-50 max-h-60 overflow-y-auto">
+              {searchResults.map((item, idx) => (
+                <button
+                  key={idx}
+                  type="button"
+                  onClick={() => handleSelectResult(item)}
+                  className="w-full text-left px-4 py-3 hover:bg-primary-container/10 border-b border-outline-variant/10 flex items-start gap-2.5 transition-colors cursor-pointer search-result-item"
+                >
+                  <span className="material-symbols-outlined text-primary text-lg mt-0.5">location_on</span>
+                  <div className="min-w-0 flex-1">
+                    <div className="text-sm font-bold plusJakartaSans text-on-surface truncate">{item.name}</div>
+                    <div className="text-xs manrope text-on-surface-variant truncate">{item.formatted}</div>
+                  </div>
+                </button>
+              ))}
+            </div>
+          )}
+
+          {searchError && (
+            <p id="search-error-msg" className="text-xs text-error mt-1.5 font-medium manrope px-1">{searchError}</p>
+          )}
+        </div>
+
+        {/* Leaflet Map */}
+        {!manualMode ? (
+          <div className="relative rounded-2xl overflow-hidden border border-outline-variant/30 shadow-md">
+            <div
+              ref={mapContainerRef}
+              id="leaflet-map-canvas"
+              style={{ height: '340px', width: '100%', zIndex: 1 }}
+              className="w-full"
+            />
+            <div className="absolute bottom-2 left-2 z-10 bg-surface/90 backdrop-blur-md px-3 py-1.5 rounded-lg border border-outline-variant/20 text-[11px] font-medium text-on-surface shadow-sm pointer-events-none">
+              📍 Drag marker or click map to pinpoint location
+            </div>
+          </div>
+        ) : (
+          <div className="p-4 rounded-xl bg-surface-container-highest border border-outline-variant/20 space-y-2">
+            <label className="text-xs font-bold manrope text-on-surface-variant">Manual Address Input:</label>
+            <textarea
+              id="manual-location-textarea"
+              rows="2"
+              value={selectedLocation.address}
+              onChange={(e) => {
+                const addr = e.target.value;
+                setSelectedLocation(prev => ({ ...prev, address: addr }));
+                if (onLocationChange) onLocationChange({ address: addr, latitude: null, longitude: null, isConfirmed: true, manual: true });
+              }}
+              placeholder="Enter full pickup street address manually..."
+              className="w-full p-3 rounded-lg bg-surface-container-lowest border border-outline-variant/30 text-sm manrope text-on-surface focus:ring-2 focus:ring-primary"
+            />
+          </div>
+        )}
+
+        {/* Selected Location Details */}
+        <div className="p-4 rounded-xl bg-surface-container-highest/60 border border-outline-variant/20 flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="space-y-1 min-w-0 flex-1">
+            <div className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-primary">
+              <span className="material-symbols-outlined text-sm">pin_drop</span> Selected:
+            </div>
+            <p id="map-selected-address-text" className="text-sm font-bold plusJakartaSans text-on-surface leading-snug break-words">
+              {selectedLocation.address || 'Search above or click on the map to set pickup point.'}
+            </p>
+            {selectedLocation.latitude && selectedLocation.longitude ? (
+              <div className="flex items-center gap-4 text-xs text-on-surface-variant font-mono pt-0.5">
+                <span>Latitude: <strong id="selected-lat-val" className="text-on-surface">{selectedLocation.latitude.toFixed(5)}</strong></span>
+                <span>Longitude: <strong id="selected-lng-val" className="text-on-surface">{selectedLocation.longitude.toFixed(5)}</strong></span>
+              </div>
+            ) : null}
+          </div>
+
+          <div className="flex items-center gap-2 flex-shrink-0">
+            <button
+              id="toggle-manual-mode-btn"
+              type="button"
+              onClick={() => setManualMode(!manualMode)}
+              className="px-3.5 py-2 text-xs font-bold rounded-lg border border-outline-variant/40 hover:bg-surface-variant/40 transition-colors text-on-surface-variant cursor-pointer"
+            >
+              {manualMode ? '🗺️ Use Map' : '✏️ Manual'}
+            </button>
+
+            <button
+              id="confirm-location-btn"
+              type="button"
+              onClick={handleConfirm}
+              className={`px-5 py-2.5 rounded-full font-bold text-sm plusJakartaSans flex items-center gap-1.5 transition-all duration-200 cursor-pointer shadow-sm ${
+                isConfirmed
+                  ? 'bg-emerald-600 text-white'
+                  : 'bg-primary text-on-primary hover:bg-emerald-800'
+              }`}
+            >
+              <span className="material-symbols-outlined text-base">
+                {isConfirmed ? 'verified' : 'check'}
+              </span>
+              <span>{isConfirmed ? '✓ Location Confirmed' : '✓ Confirm Location'}</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Confirmation Status Banner */}
+        {isConfirmed && (
+          <div id="location-confirmed-banner" className="p-3 rounded-xl bg-emerald-500/15 border border-primary/30 text-emerald-900 dark:text-emerald-100 flex items-center gap-2 text-xs font-bold manrope">
+            <span className="material-symbols-outlined text-primary text-base">check_circle</span>
+            <span>✓ Location confirmed: {selectedLocation.address} ({selectedLocation.latitude}, {selectedLocation.longitude})</span>
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  // Mount LocationPicker into DOM
+  const mountEl = document.getElementById('react-location-picker-mount');
+  if (mountEl) {
+    const root = ReactDOM.createRoot(mountEl);
+    root.render(
+      <LocationPicker
+        onLocationChange={(loc) => {
+          const locInput = document.getElementById('pickup-location');
+          const latInput = document.getElementById('pickup-latitude');
+          const lngInput = document.getElementById('pickup-longitude');
+          const confInput = document.getElementById('location-confirmed');
+
+          if (locInput) locInput.value = loc.address || '';
+          if (latInput) latInput.value = (loc.latitude !== null && loc.latitude !== undefined) ? loc.latitude : '';
+          if (lngInput) lngInput.value = (loc.longitude !== null && loc.longitude !== undefined) ? loc.longitude : '';
+          if (confInput) confInput.value = loc.isConfirmed ? 'true' : 'false';
+
+          window.zervoSelectedLocation = loc;
+        }}
+      />
+    );
+  }
+</script>
+</body></html>

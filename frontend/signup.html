@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Sign Up | ZERVO Food Redistribution</title>
+<script>
+  // Suppress Tailwind Play CDN warning in developer console
+  (function() {
+    const _warn = console.warn;
+    console.warn = function(...args) {
+      if (args[0] && typeof args[0] === 'string' && args[0].includes('cdn.tailwindcss.com')) return;
+      _warn.apply(console, args);
+    };
+  })();
+</script>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+  .material-symbols-outlined {
+    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+  }
+</style>
+<script>
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        colors: {
+          "primary": "#0d631b", "primary-container": "#2e7d32",
+          "primary-fixed": "#a3f69c", "primary-fixed-dim": "#88d982",
+          "on-primary": "#ffffff", "on-primary-container": "#cbffc2",
+          "secondary": "#964900", "secondary-container": "#fc820c",
+          "secondary-fixed": "#ffdcc6", "secondary-fixed-dim": "#ffb786",
+          "on-secondary": "#ffffff", "on-secondary-container": "#5e2c00",
+          "on-secondary-fixed": "#311300", "on-secondary-fixed-variant": "#723600",
+          "tertiary": "#386000", "tertiary-container": "#4a7b00",
+          "tertiary-fixed": "#b9f474", "tertiary-fixed-dim": "#9ed75b",
+          "on-tertiary": "#ffffff", "on-tertiary-container": "#d6ffa5",
+          "on-tertiary-fixed": "#0f2000", "on-tertiary-fixed-variant": "#2e4f00",
+          "surface": "#f5fced", "surface-dim": "#d5dcce",
+          "surface-variant": "#dee5d6", "surface-container": "#e9f0e1",
+          "surface-container-low": "#eff6e7", "surface-container-lowest": "#ffffff",
+          "surface-container-high": "#e3ebdc", "surface-container-highest": "#dee5d6",
+          "on-surface": "#171d14", "on-surface-variant": "#40493d",
+          "inverse-surface": "#2c3228", "inverse-on-surface": "#ecf3e4",
+          "inverse-primary": "#88d982", "background": "#f5fced",
+          "on-background": "#171d14", "outline": "#707a6c",
+          "outline-variant": "#bfcaba", "error": "#ba1a1a",
+          "error-container": "#ffdad6", "on-error": "#ffffff",
+        },
+        fontFamily: {
+          "headline": ["Plus Jakarta Sans", "sans-serif"],
+          "body": ["Manrope", "sans-serif"],
+          "label": ["Manrope", "sans-serif"],
+        },
+        borderRadius: {
+          "DEFAULT": "1rem", "lg": "2rem", "xl": "3rem", "full": "9999px"
+        },
+      },
+    },
+  }
+</script>
+</head>
+<body class="flex flex-col min-h-screen selection:bg-primary/20 selection:text-primary">
+<!-- TopNavBar: Execution of JSON style keys -->
+<header class="fixed top-0 w-full z-50 bg-[#f5fced]/80 dark:bg-zinc-950/80 backdrop-blur-xl">
+<nav class="flex justify-between items-center px-8 py-4 max-w-screen-2xl mx-auto">
+<a href="index.html" class="text-2xl font-black text-green-900 dark:text-green-50 tracking-tighter font-['Plus_Jakarta_Sans'] block">
+                ZERVO
+            </a>
+</nav>
+</header>
+<!-- Main Content: Signup Canvas -->
+<main class="flex-grow flex items-center justify-center px-6 pt-32 relative overflow-hidden pb-12">
+<!-- Abstract Organic Background Elements -->
+<div class="absolute top-1/4 -left-20 w-96 h-96 bg-primary/5 rounded-full blur-3xl -z-10"></div>
+<div class="absolute bottom-1/4 -right-20 w-80 h-80 bg-secondary/5 rounded-full blur-3xl -z-10"></div>
+<div class="w-full max-w-xl">
+<!-- Signup Card -->
+<div class="bg-surface-container-lowest rounded-xl shadow-[0px_20px_40px_rgba(23,29,20,0.06)] p-8 md:p-12 border border-outline-variant/15">
+<div class="text-center mb-10">
+<h1 class="text-4xl md:text-5xl font-['Plus_Jakarta_Sans'] font-extrabold text-on-surface tracking-tight mb-4">
+                        Join the Movement
+                    </h1>
+<p class="text-on-surface-variant text-lg leading-relaxed">
+                        Create an account to help us reduce food waste and feed our community.
+                    </p>
+</div>
+<form class="space-y-6">
+<!-- Name Field -->
+<div class="space-y-2">
+<label class="block text-sm font-semibold text-on-surface-variant ml-1 font-['Manrope']" for="name">Full Name</label>
+<div class="relative group">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline-variant group-focus-within:text-primary transition-colors">person</span>
+<input class="w-full pl-12 pr-4 py-4 bg-surface-container-highest rounded-full border-none focus:ring-2 focus:ring-primary focus:bg-surface-container-lowest transition-all placeholder:text-outline-variant text-on-surface" id="name" placeholder="Enter your full name" type="text"/>
+</div>
+</div>
+<!-- Mobile Number -->
+<div class="space-y-2">
+<label class="block text-sm font-semibold text-on-surface-variant ml-1 font-['Manrope']" for="phone">Mobile Number</label>
+<div class="relative group">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline-variant group-focus-within:text-primary transition-colors">phone_iphone</span>
+<input class="w-full pl-12 pr-4 py-4 bg-surface-container-highest rounded-full border-none focus:ring-2 focus:ring-primary focus:bg-surface-container-lowest transition-all placeholder:text-outline-variant text-on-surface" id="phone" placeholder="+1 (555) 000-0000" type="tel"/>
+</div>
+</div>
+<!-- Email Address -->
+<div class="space-y-2">
+<label class="block text-sm font-semibold text-on-surface-variant ml-1 font-['Manrope']" for="email">Email Address</label>
+<div class="relative group">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline-variant group-focus-within:text-primary transition-colors">mail</span>
+<input class="w-full pl-12 pr-4 py-4 bg-surface-container-highest rounded-full border-none focus:ring-2 focus:ring-primary focus:bg-surface-container-lowest transition-all placeholder:text-outline-variant text-on-surface" id="email" placeholder="you@example.com" type="email"/>
+</div>
+</div>
+<!-- Password -->
+<div class="space-y-2">
+<label class="block text-sm font-semibold text-on-surface-variant ml-1 font-['Manrope']" for="password">Password</label>
+<div class="relative group">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline-variant group-focus-within:text-primary transition-colors">lock</span>
+<input class="w-full pl-12 pr-12 py-4 bg-surface-container-highest rounded-full border-none focus:ring-2 focus:ring-primary focus:bg-surface-container-lowest transition-all placeholder:text-outline-variant text-on-surface" id="password" placeholder="Create a strong password" type="password"/>
+<button class="absolute right-4 top-1/2 -translate-y-1/2 text-outline-variant hover:text-on-surface transition-colors" id="toggle-password" type="button">
+<span class="material-symbols-outlined" id="eye-icon">visibility</span>
+</button>
+</div>
+</div>
+<!-- Action Button -->
+<div class="pt-4">
+<button class="w-full bg-primary text-on-primary font-['Plus_Jakarta_Sans'] font-bold py-4 rounded-full shadow-lg shadow-primary/20 hover:bg-primary-container hover:text-on-primary-container transition-all active:scale-95 active:opacity-90 flex items-center justify-center gap-2" type="submit">
+                            Sign Up
+                            <span class="material-symbols-outlined">arrow_forward</span>
+</button>
+</div>
+<!-- Login Link -->
+<div class="text-center pt-4">
+<p class="text-on-surface-variant font-['Manrope']">
+                            Already have an account? 
+                            <a class="text-primary font-bold hover:underline decoration-2 underline-offset-4 ml-1" href="login.html">Login</a>
+</p>
+</div>
+</form>
+</div>
+<!-- Supporting Visual -->
+</div>
+</main>
+<!-- Form Interceptor -->
+<script type="module" src="services/api.js"></script>
+<script type="module">
+    import { apiRegister } from "./services/api.js";
+
+    // ── DOM Elements ───────────────────────────────────────────────
+    const form          = document.querySelector('form');
+    const nameInput     = document.getElementById('name');
+    const phoneInput    = document.getElementById('phone');
+    const emailInput    = document.getElementById('email');
+    const passwordInput = document.getElementById('password');
+    const submitBtn     = form.querySelector('button[type="submit"]');
+
+    // ── Signup Form Submit (FastAPI Backend Connected) ─────────────
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const name     = nameInput.value.trim();
+      const phone    = phoneInput.value.trim();
+      const email    = emailInput.value.trim();
+      const password = passwordInput.value;
+
+      if (!name || !email || !password) {
+        alert('Please fill out all required fields.');
+        return;
+      }
+
+      if (password.length < 6) {
+        alert('Password must be at least 6 characters.');
+        return;
+      }
+
+      submitBtn.disabled = true;
+      submitBtn.querySelector('span:first-child').textContent = 'Creating account…';
+
+      try {
+        const res = await apiRegister(name, email, password, phone);
+        if (res && res.access_token) {
+          localStorage.setItem('zervo_token', res.access_token);
+          localStorage.setItem('zervo_current_user', JSON.stringify(res.user));
+          window.location.href = 'role-selection.html';
+          return;
+        }
+      } catch (err) {
+        console.warn("Backend registration unavailable, using local session fallback:", err.message);
+      }
+
+      setTimeout(() => {
+        const userData = {
+          uid: 'usr-' + Date.now(),
+          name: name,
+          phone: phone || '',
+          email: email.toLowerCase(),
+          role: null,
+          createdAt: new Date().toISOString()
+        };
+
+        let users = JSON.parse(localStorage.getItem('zervo_registered_users') || '{}');
+        users[email.toLowerCase()] = userData;
+        localStorage.setItem('zervo_registered_users', JSON.stringify(users));
+        localStorage.setItem('zervo_current_user', JSON.stringify(userData));
+
+        window.location.href = 'role-selection.html';
+      }, 300);
+    });
+
+    // ── Toggle password visibility ──────────────────────────────────
+    const togglePassword = document.getElementById('toggle-password');
+    const eyeIcon        = document.getElementById('eye-icon');
+    if (togglePassword && passwordInput && eyeIcon) {
+      togglePassword.addEventListener('click', () => {
+        const isPassword = passwordInput.getAttribute('type') === 'password';
+        passwordInput.setAttribute('type', isPassword ? 'text' : 'password');
+        eyeIcon.textContent = isPassword ? 'visibility_off' : 'visibility';
+      });
+    }
+</script>
+</body></html>

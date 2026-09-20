@@ -1,0 +1,24 @@
+{
+  "name": "zervo-frontend",
+  "version": "1.0.0",
+  "private": true,
+  "description": "ZERVO Community Food Redistribution Web Application Frontend",
+  "scripts": {
+    "dev": "npx serve . -l 3000 -s",
+    "start": "npx serve . -l 3000 -s"
+  },
+  "keywords": [
+    "zervo",
+    "food-redistribution",
+    "fastapi",
+    "supabase"
+  ],
+  "author": "ZERVO Team",
+  "license": "MIT",
+  "dependencies": {
+    "leaflet": "^1.9.4",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "react-leaflet": "^5.0.0"
+  }
+}

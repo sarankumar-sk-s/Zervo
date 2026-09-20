@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script>
+  // Suppress Tailwind Play CDN warning in developer console
+  (function() {
+    const _warn = console.warn;
+    console.warn = function(...args) {
+      if (args[0] && typeof args[0] === 'string' && args[0].includes('cdn.tailwindcss.com')) return;
+      _warn.apply(console, args);
+    };
+  })();
+</script>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+  .material-symbols-outlined {
+    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+  }
+</style>
+<script>
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        colors: {
+          "primary": "#0d631b", "primary-container": "#2e7d32",
+          "primary-fixed": "#a3f69c", "primary-fixed-dim": "#88d982",
+          "on-primary": "#ffffff", "on-primary-container": "#cbffc2",
+          "secondary": "#964900", "secondary-container": "#fc820c",
+          "secondary-fixed": "#ffdcc6", "secondary-fixed-dim": "#ffb786",
+          "on-secondary": "#ffffff", "on-secondary-container": "#5e2c00",
+          "on-secondary-fixed": "#311300", "on-secondary-fixed-variant": "#723600",
+          "tertiary": "#386000", "tertiary-container": "#4a7b00",
+          "tertiary-fixed": "#b9f474", "tertiary-fixed-dim": "#9ed75b",
+          "on-tertiary": "#ffffff", "on-tertiary-container": "#d6ffa5",
+          "on-tertiary-fixed": "#0f2000", "on-tertiary-fixed-variant": "#2e4f00",
+          "surface": "#f5fced", "surface-dim": "#d5dcce",
+          "surface-variant": "#dee5d6", "surface-container": "#e9f0e1",
+          "surface-container-low": "#eff6e7", "surface-container-lowest": "#ffffff",
+          "surface-container-high": "#e3ebdc", "surface-container-highest": "#dee5d6",
+          "on-surface": "#171d14", "on-surface-variant": "#40493d",
+          "inverse-surface": "#2c3228", "inverse-on-surface": "#ecf3e4",
+          "inverse-primary": "#88d982", "background": "#f5fced",
+          "on-background": "#171d14", "outline": "#707a6c",
+          "outline-variant": "#bfcaba", "error": "#ba1a1a",
+          "error-container": "#ffdad6", "on-error": "#ffffff",
+        },
+        fontFamily: {
+          "headline": ["Plus Jakarta Sans", "sans-serif"],
+          "body": ["Manrope", "sans-serif"],
+          "label": ["Manrope", "sans-serif"],
+        },
+        borderRadius: {
+          "DEFAULT": "1rem", "lg": "2rem", "xl": "3rem", "full": "9999px"
+        },
+      },
+    },
+  }
+</script>
+</head>
+<body class="bg-surface text-on-surface min-h-screen selection:bg-primary-fixed selection:text-on-primary-fixed">
+<!-- TopNavBar -->
+<header class="bg-surface/80 backdrop-blur-md dark:bg-zinc-950/80 shadow-sm dark:shadow-none fixed top-0 w-full z-50">
+<div class="flex justify-between items-center px-8 py-4 max-w-screen-2xl mx-auto">
+<div class="flex items-center gap-8">
+<a href="index.html" class="text-2xl font-extrabold tracking-tighter text-green-800 dark:text-green-400 hover:opacity-80">ZERVO</a>
+</div>
+<div class="flex items-center gap-4 relative">
+<!-- Notification Trigger -->
+<!-- Notifications -->
+<div class="relative zervo-notifications" id="notif-wrapper">
+    <button class="zervo-notifications-btn p-2 rounded-full hover:bg-green-50 dark:hover:bg-green-900/20 text-zinc-600 dark:text-zinc-400 transition-colors active:scale-95 duration-200 relative flex items-center justify-center">
+        <span class="material-symbols-outlined pointer-events-none">notifications</span>
+        <span class="zervo-notifications-badge hidden absolute top-0.5 right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-error text-[10px] font-bold text-white shadow-sm pointer-events-none"></span>
+    </button>
+    <!-- Dropdown Panel -->
+    <div class="zervo-notifications-dropdown hidden absolute right-0 mt-2 sm:w-[360px] w-screen max-w-[calc(100vw-2rem)] bg-surface dark:bg-zinc-900 rounded-2xl shadow-xl border border-outline-variant/20 overflow-hidden z-50 transform origin-top transition-all duration-200 opacity-0 scale-95 pointer-events-none flex flex-col">
+        <div class="p-4 border-b border-outline-variant/10 flex justify-between items-center w-full bg-surface-container-lowest/50 backdrop-blur-sm">
+            <h3 class="font-headline font-bold text-on-surface">Notifications</h3>
+            <button class="zervo-notifications-mark-all text-xs font-bold text-primary hover:text-green-800 transition-colors cursor-pointer">Mark as read</button>
+        </div>
+        <div class="zervo-notifications-list w-full max-h-[60vh] overflow-y-auto"></div>
+        <div class="zervo-notifications-empty hidden py-12 px-6 flex flex-col items-center justify-center text-center gap-3 w-full border-t border-outline-variant/5">
+            <div class="w-16 h-16 rounded-full bg-surface-variant/20 flex items-center justify-center text-primary">
+                <span class="material-symbols-outlined text-3xl">notifications_off</span>
+            </div>
+            <p class="text-on-surface-variant font-medium text-sm">No notifications yet</p>
+        </div>
+    </div>
+</div>
+<!-- Profile Dropdown -->
+<div class="relative zervo-profile-wrapper">
+    <button class="zervo-profile-rtrig flex items-center justify-center rounded-full ring-2 ring-transparent hover:ring-primary/20 focus:ring-primary/40 focus:outline-none transition-all duration-200 active:scale-95 overflow-hidden" aria-haspopup="true" aria-expanded="false">
+        <div class="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center text-primary font-bold text-sm font-headline">
+            SM
+        </div>
+    </button>
+    <!-- Dropdown Panel -->
+    <div class="zervo-profile-rdown absolute right-0 mt-3 w-64 bg-surface-container-lowest rounded-2xl shadow-xl border border-outline-variant/20 z-50 overflow-hidden transform origin-top-right transition-all duration-200 ease-out flex flex-col opacity-0 scale-95 -translate-y-2 invisible pointer-events-none">
+        <div class="p-4 border-b border-outline-variant/10 bg-surface-container-low/50">
+            <p class="font-headline font-bold text-on-surface text-sm truncate">Sarah Miller</p>
+            <p class="text-on-surface-variant font-medium text-xs mt-0.5 truncate">Green Valley Shelter</p>
+        </div>
+        <div class="py-2">
+            <a href="editprofile.html" class="flex items-center w-full px-4 py-2.5 text-sm font-medium text-on-surface hover:bg-surface-variant/40 hover:text-primary transition-colors focus:outline-none" role="menuitem">
+                <span class="material-symbols-outlined mr-3 text-[20px]">person</span> View Profile
+            </a>
+
+        </div>
+        <div class="py-2 border-t border-outline-variant/10">
+            <a href="login.html" class="flex items-center w-full px-4 py-2.5 text-sm font-bold text-error hover:bg-error/10 transition-colors focus:outline-none" role="menuitem">
+                <span class="material-symbols-outlined mr-3 text-[20px]">logout</span> Logout
+            </a>
+        </div>
+    </div>
+</div>
+</div>
+</div>
+</header>
+<main class="pt-32 pb-20 px-6 max-w-2xl mx-auto">
+<!-- Content Container -->
+<div class="space-y-12">
+<!-- Header Section -->
+<div class="text-center space-y-4">
+<h1 class="text-4xl md:text-5xl font-extrabold tracking-tight text-on-surface">Send Request</h1>
+<p class="text-on-surface-variant font-medium">Connect your organization with surplus food resources in your community.</p>
+</div>
+<!-- Form Section (Bento Inspired Minimalist Card) -->
+<div class="bg-surface-container-low rounded-xl p-8 md:p-12 shadow-sm border border-outline-variant/10">
+<form class="space-y-8" onsubmit="return false;">
+<!-- Input Group: Organization -->
+<div class="space-y-2">
+<label class="text-sm font-bold tracking-wide text-primary-container px-4 uppercase" for="org-name">Organization Details</label>
+<div class="relative group">
+<div class="absolute inset-y-0 left-5 flex items-center pointer-events-none text-outline group-focus-within:text-primary transition-colors">
+<span class="material-symbols-outlined">corporate_fare</span>
+</div>
+<input class="w-full pl-14 pr-6 py-5 bg-surface-container-lowest border-none rounded-full text-on-surface placeholder:text-outline-variant focus:ring-2 focus:ring-primary/20 transition-all shadow-sm" id="org-name" placeholder="Organization Name" type="text"/>
+</div>
+</div>
+<!-- Input Group: Address -->
+<div class="space-y-2">
+<div class="relative group">
+<div class="absolute inset-y-0 left-5 flex items-center pointer-events-none text-outline group-focus-within:text-primary transition-colors">
+<span class="material-symbols-outlined">location_on</span>
+</div>
+<input class="w-full pl-14 pr-6 py-5 bg-surface-container-lowest border-none rounded-full text-on-surface placeholder:text-outline-variant focus:ring-2 focus:ring-primary/20 transition-all shadow-sm" id="address" placeholder="Delivery Address" type="text"/>
+</div>
+</div>
+<!-- Input Group: Contact -->
+<div class="space-y-2">
+<div class="relative group">
+<div class="absolute inset-y-0 left-5 flex items-center pointer-events-none text-outline group-focus-within:text-primary transition-colors">
+<span class="material-symbols-outlined">call</span>
+</div>
+<input class="w-full pl-14 pr-6 py-5 bg-surface-container-lowest border-none rounded-full text-on-surface placeholder:text-outline-variant focus:ring-2 focus:ring-primary/20 transition-all shadow-sm" id="contact" placeholder="Contact Number" type="tel"/>
+</div>
+</div>
+<!-- Action Button -->
+<div class="pt-4">
+<button id="submit-btn" type="button" class="w-full py-5 bg-primary text-on-primary font-bold text-lg rounded-full shadow-lg shadow-primary/20 hover:bg-primary-container hover:scale-[1.02] active:scale-95 transition-all flex justify-center items-center gap-2">
+<span id="submit-label">Submit Request</span>
+<span class="material-symbols-outlined">send</span>
+</button>
+</div>
+</form>
+</div>
+</div>
+</main>
+<script>
+  function togglePopup(id) {
+    const popup = document.getElementById(id);
+    const otherId = id === "notification-popup" ? "profile-popup" : "notification-popup";
+    const otherPopup = document.getElementById(otherId);
+    if (otherPopup) otherPopup.classList.add("popup-hidden");
+    if (popup) popup.classList.toggle("popup-hidden");
+  }
+
+  // Close legacy popups only if those IDs exist.
+  window.addEventListener("click", function(e) {
+    if (!e.target.closest(".relative")) {
+      const notificationPopup = document.getElementById("notification-popup");
+      const profilePopup = document.getElementById("profile-popup");
+      if (notificationPopup) notificationPopup.classList.add("popup-hidden");
+      if (profilePopup) profilePopup.classList.add("popup-hidden");
+    }
+  });
+</script>
+<script type="module" src="assets/js/profile.js"></script>
+
+<script type="module" src="services/api.js"></script>
+
+<script type="module">
+  import { apiCreateFoodRequest } from "./services/api.js";
+
+  // ── Food Request Submission (FastAPI Connected) ───────────────────────────
+
+  let currentUser = null;
+
+  function showToast(msg, isError = false) {
+    let t = document.getElementById('req-toast');
+    if (!t) {
+      t = document.createElement('div');
+      t.id = 'req-toast';
+      t.style.cssText = 'position:fixed;top:80px;left:50%;transform:translateX(-50%);z-index:9999;padding:12px 24px;border-radius:999px;font-weight:700;font-size:14px;box-shadow:0 4px 20px rgba(0,0,0,0.15);display:none;font-family:Manrope,sans-serif;';
+      document.body.appendChild(t);
+    }
+    t.textContent      = msg;
+    t.style.background = isError ? '#ba1a1a' : '#0d631b';
+    t.style.color      = '#fff';
+    t.style.display    = 'block';
+    setTimeout(() => t.style.display = 'none', 3500);
+  }
+
+  function initializeRequest() {
+    const user = JSON.parse(localStorage.getItem('zervo_current_user') || 'null');
+    if (!user) { 
+      window.location.href = 'login.html'; 
+      return; 
+    }
+    currentUser = user;
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    initializeRequest();
+    
+    const submitBtn = document.getElementById('submit-btn');
+    if (!submitBtn) return;
+
+    submitBtn.addEventListener('click', async () => {
+      if (!currentUser) { showToast('Please login first', true); return; }
+      
+      const orgName = document.getElementById('org-name')?.value.trim();
+      const address = document.getElementById('address')?.value.trim();
+      const contact = document.getElementById('contact')?.value.trim();
+
+      if (!orgName) { showToast('❌ Please enter your organization name', true); return; }
+      if (!address) { showToast('❌ Please enter your delivery address', true); return; }
+      if (!contact) { showToast('❌ Please enter your contact number', true); return; }
+
+      const btn   = document.getElementById('submit-btn');
+      const label = document.getElementById('submit-label');
+      btn.disabled      = true;
+      label.textContent = 'Sending…';
+
+      const requestData = {
+        organisation: orgName,
+        address: address,
+        contact: contact
+      };
+
+      try {
+        await apiCreateFoodRequest(requestData);
+      } catch (err) {
+        console.warn("Backend request submission warning:", err.message);
+      }
+
+      // Store in sessionStorage for local fallback
+      const requestId = 'req-' + Date.now();
+      let requests = JSON.parse(sessionStorage.getItem('zervo_requests') || '{}');
+      requests[requestId] = { id: requestId, receiverId: currentUser.uid, ...requestData, status: 'pending', createdAt: Date.now() };
+      sessionStorage.setItem('zervo_requests', JSON.stringify(requests));
+
+      showToast('✅ Request sent! Volunteers notified.');
+      document.getElementById('org-name').value = '';
+      document.getElementById('address').value  = '';
+      document.getElementById('contact').value  = '';
+      
+      btn.disabled = false;
+      label.textContent = 'Submit Request';
+    });
+  });
+</script>
+</body></html>

@@ -1,0 +1,30 @@
+{
+  "cleanUrls": false,
+  "directoryListing": false,
+  "headers": [
+    {
+      "source": "**/*",
+      "headers": [
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        }
+      ]
+    }
+  ],
+  "rewrites": [
+    { "source": "/", "destination": "/index.html" },
+    { "source": "/frontend", "destination": "/index.html" },
+    { "source": "/frontend/**", "destination": "/index.html" },
+    { "source": "/login", "destination": "/login.html" },
+    { "source": "/signup", "destination": "/role-selection.html" },
+    { "source": "/role-selection", "destination": "/role-selection.html" },
+    { "source": "/submission", "destination": "/submission.html" },
+    { "source": "/submission-popups", "destination": "/submission-popups.html" },
+    { "source": "/volunteer-dashboard", "destination": "/volunteer-dashboard.html" },
+    { "source": "/pickup-workflow", "destination": "/pickup-workflow.html" },
+    { "source": "/impact-dashboard", "destination": "/impact-dashboard.html" },
+    { "source": "/editprofile", "destination": "/editprofile.html" },
+    { "source": "/forgot-password", "destination": "/forgot-password.html" }
+  ]
+}
